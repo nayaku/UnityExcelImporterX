@@ -1,0 +1,16 @@
+using System;
+using System.Collections.Generic;
+using UnityEngine;
+
+#BEGINASSETENITYNAMEDEFINE#
+[Serializable]
+public class #ASSETENITYNAME#
+{
+#ASSETENITYFIELDS#
+}
+#ENDASSETENITYNAMEDEFINE#
+[ExcelAsset]
+public class #ASSETSCRIPTNAME# : ScriptableObject
+{
+#ASSETSCRIPTFIELDS#
+}
