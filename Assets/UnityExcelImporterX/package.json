@@ -1,0 +1,21 @@
+{
+  "name": "net.mikinya.unity-excel-importer-x",
+  "displayName": "Unity Excel ImporterX",
+  "version": "1.0.0",
+  "unity": "2019.4",
+  "description": "Automatically import data from xls, xlsx file into custom ScriptableObject in the Unity Editor.",
+  "license": "MIT",
+  "gitDependencies": {},
+  "keywords": [
+    "Excel"
+  ],
+  "samples": [
+    {
+      "displayName": "Example",
+      "path": "Example~"
+    }
+  ],
+  "author": {
+    "name": "Nayaku"
+  }
+}
