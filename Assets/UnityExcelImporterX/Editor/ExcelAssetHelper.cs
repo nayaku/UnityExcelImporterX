@@ -1,9 +1,5 @@
-﻿using NPOI.SS.UserModel;
-using System;
+using NPOI.SS.UserModel;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 public class SheetField
 {
@@ -16,25 +12,38 @@ public static class ExcelAssetHelper
 {
     public static List<SheetField> GetFieldFromSheetHeader(ISheet sheet)
     {
-        var headerRow = sheet.GetRow(0);
-        var typeRow = sheet.GetRow(1);
-        var commentRow = sheet.GetRow(2);
+        IRow headerRow = sheet.GetRow(0);
+        IRow typeRow = sheet.GetRow(1);
+        IRow commentRow = sheet.GetRow(2);
         if (headerRow == null || typeRow == null)
-            return null;
-        var sheetFields = new List<SheetField>();
-        for (var j = 0; j < headerRow.LastCellNum; j++)
         {
-            var nameCell = headerRow.GetCell(j);
-            var typeCell = typeRow.GetCell(j);
-            var commentCell = commentRow?.GetCell(j);
+            return null;
+        }
 
-            if (nameCell == null || typeCell == null) break;
+        List<SheetField> sheetFields = new();
+        for (int j = 0; j < headerRow.LastCellNum; j++)
+        {
+            ICell nameCell = headerRow.GetCell(j);
+            ICell typeCell = typeRow.GetCell(j);
+            ICell commentCell = commentRow?.GetCell(j);
+
+            if (nameCell == null || typeCell == null)
+            {
+                break;
+            }
             // 注释列跳过
             if ((nameCell.CellType == CellType.String && nameCell.StringCellValue.StartsWith("#")) ||
-                (typeCell.CellType == CellType.String && typeCell.StringCellValue.StartsWith("#"))) continue;
+                (typeCell.CellType == CellType.String && typeCell.StringCellValue.StartsWith("#")))
+            {
+                continue;
+            }
             // 空白列视为结束
-            if (nameCell.CellType == CellType.Blank || typeCell.CellType == CellType.Blank) break;
-            var field = new SheetField
+            if (nameCell.CellType == CellType.Blank || typeCell.CellType == CellType.Blank)
+            {
+                break;
+            }
+
+            SheetField field = new()
             {
                 FieldName = nameCell.StringCellValue,
                 FieldType = typeCell.StringCellValue,

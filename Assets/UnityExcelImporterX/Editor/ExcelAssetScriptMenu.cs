@@ -2,12 +2,10 @@ using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
 using NPOI.XSSF.UserModel;
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using System.IO;
 using System.Text.RegularExpressions;
 using UnityEditor;
-using UnityEngine;
 
 
 
@@ -19,64 +17,75 @@ public class SheetStruct
 
 public class ExcelAssetScriptMenu
 {
-    const string ScriptTemplateName = "ExcelAssetScriptTemplete.cs.txt";
+    private const string ScriptTemplateName = "ExcelAssetScriptTemplete.cs.txt";
 
     [MenuItem("Assets/Create/ExcelAssetScript", false)]
     private static void CreateScript()
     {
-        // —°÷–Œƒº˛
-        var selectedAssets = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets);
-        var selectedAsset = selectedAssets[0];
-        var assetPath = AssetDatabase.GetAssetPath(selectedAsset);
-        var assetName = Path.GetFileName(assetPath);
-        var assetDirectory = Path.GetDirectoryName(assetPath);
+        // ÈÄâ‰∏≠Êñá‰ª∂
+        UnityEngine.Object[] selectedAssets = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets);
+        UnityEngine.Object selectedAsset = selectedAssets[0];
+        string assetPath = AssetDatabase.GetAssetPath(selectedAsset);
+        string assetName = Path.GetFileName(assetPath);
+        string assetDirectory = Path.GetDirectoryName(assetPath);
 
-        // —°‘Ò±£¥Ê¬∑æ∂
-        var newScriptName = Path.ChangeExtension(assetName, "cs");
-        var savePath = EditorUtility.SaveFilePanel("Save ExcelAssetScript", assetDirectory, newScriptName, "cs");
+        // ÈÄâÊã©‰øùÂ≠òË∑ØÂæÑ
+        string newScriptName = Path.ChangeExtension(assetName, "cs");
+        string savePath = EditorUtility.SaveFilePanel("Save ExcelAssetScript", assetDirectory, newScriptName, "cs");
         if (string.IsNullOrEmpty(savePath))
+        {
             return;
+        }
 
-        // …˙≥…Ω≈±æ
+        // ÁîüÊàêËÑöÊú¨
         CreateScript(assetPath, savePath);
 
-        // À¢–¬◊ ‘¥
+        // Âà∑Êñ∞ËµÑÊ∫ê
         AssetDatabase.Refresh();
     }
 
     [MenuItem("Assets/Create/ExcelAssetScript", true)]
     private static bool CreateScriptValidation()
     {
-        var selectedAssets = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets);
-        if (selectedAssets.Length != 1) return false;
-        var path = AssetDatabase.GetAssetPath(selectedAssets[0]);
-        return Path.GetExtension(path) == ".xls" || Path.GetExtension(path) == ".xlsx";
+        UnityEngine.Object[] selectedAssets = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets);
+        if (selectedAssets.Length != 1)
+        {
+            return false;
+        }
+
+        string path = AssetDatabase.GetAssetPath(selectedAssets[0]);
+        return Path.GetExtension(path) is ".xls" or ".xlsx";
     }
 
     private static void CreateScript(string assetPath, string savePath)
     {
-        // ∂¡»°ExcelŒƒº˛
-        var sheetStructs = GetSheetStruct(assetPath);
-        if (sheetStructs.Count == 0) return;
-        var assetName = Path.GetFileNameWithoutExtension(assetPath);
-        var scriptContent = BuildScriptContent(assetName, sheetStructs);
+        // ËØªÂèñExcelÊñá‰ª∂
+        List<SheetStruct> sheetStructs = GetSheetStruct(assetPath);
+        if (sheetStructs.Count == 0)
+        {
+            return;
+        }
+
+        string assetName = Path.GetFileNameWithoutExtension(assetPath);
+        string scriptContent = BuildScriptContent(assetName, sheetStructs);
         NewlineNormalizer.Write(savePath, scriptContent);
     }
 
     private static List<SheetStruct> GetSheetStruct(string excelPath)
     {
-        var sheetStructs = new List<SheetStruct>();
-        using var stream = File.Open(excelPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        IWorkbook book = null;
-        if (Path.GetExtension(excelPath) == ".xls") book = new HSSFWorkbook(stream);
-        else book = new XSSFWorkbook(stream);
-        for (var i = 0; i < book.NumberOfSheets; i++)
+        List<SheetStruct> sheetStructs = new();
+        using FileStream stream = File.Open(excelPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
+        IWorkbook book = Path.GetExtension(excelPath) == ".xls" ? new HSSFWorkbook(stream) : new XSSFWorkbook(stream);
+        for (int i = 0; i < book.NumberOfSheets; i++)
         {
-            var sheet = book.GetSheetAt(i);
-            var sheetfields = ExcelAssetHelper.GetFieldFromSheetHeader(sheet);
-            if (sheetfields == null || sheetfields.Count == 0) continue;
+            ISheet sheet = book.GetSheetAt(i);
+            List<SheetField> sheetfields = ExcelAssetHelper.GetFieldFromSheetHeader(sheet);
+            if (sheetfields == null || sheetfields.Count == 0)
+            {
+                continue;
+            }
 
-            var sheetStruct = new SheetStruct
+            SheetStruct sheetStruct = new()
             {
                 SheetName = sheet.SheetName,
                 Fields = sheetfields
@@ -88,31 +97,34 @@ public class ExcelAssetScriptMenu
 
     private static string GetScriptTemplate()
     {
-        var currentDirectory = Directory.GetCurrentDirectory();
-        var filePath = Directory.GetFiles(currentDirectory, ScriptTemplateName, SearchOption.AllDirectories);
-        if (filePath.Length == 0) throw new Exception("Script template not found.");
+        string currentDirectory = Directory.GetCurrentDirectory();
+        string[] filePath = Directory.GetFiles(currentDirectory, ScriptTemplateName, SearchOption.AllDirectories);
+        if (filePath.Length == 0)
+        {
+            throw new Exception("Script template not found.");
+        }
 
-        var templateString = NewlineNormalizer.Read(filePath[0]);
+        string templateString = NewlineNormalizer.Read(filePath[0]);
         return templateString;
     }
 
     private static string BuildScriptEnityContent(string entityTemplateString, string excelName, string sheetName,
         List<SheetField> Fields)
     {
-        var enityClassName = excelName + "Entity";
+        string enityClassName = excelName + "Entity";
         if (!string.IsNullOrEmpty(sheetName))
         {
             enityClassName += "_" + sheetName;
         }
         entityTemplateString = entityTemplateString.Replace("#ASSETENITYNAME#", enityClassName);
-        var fields = "";
-        foreach (var field in Fields)
+        string fields = "";
+        foreach (SheetField field in Fields)
         {
             if (!string.IsNullOrEmpty(field.FieldComment))
             {
-                fields += $"\t/// <summary>\n\t/// {field.FieldComment}\n\t/// </summary>\n";
+                fields += $"    /// <summary>\n    /// {field.FieldComment}\n    /// </summary>\n";
             }
-            fields += $"\tpublic {field.FieldType} {field.FieldName};\n";
+            fields += $"    public {field.FieldType} {field.FieldName};\n";
         }
         entityTemplateString = entityTemplateString.Replace("#ASSETENITYFIELDS#", fields);
         entityTemplateString += "\n";
@@ -121,19 +133,19 @@ public class ExcelAssetScriptMenu
 
     private static string BuildScriptFields(string excelName, List<SheetStruct> sheetStructs)
     {
-        var scriptFieldContent = "";
-        // π§◊˜±ÌŒ™1∏ˆ ±£¨≤ª«¯∑÷π§◊˜±Ì√˚≥∆
+        string scriptFieldContent = "";
+        // Â∑•‰ΩúË°®‰∏∫1‰∏™Êó∂Ôºå‰∏çÂå∫ÂàÜÂ∑•‰ΩúË°®ÂêçÁß∞
         if (sheetStructs.Count == 1)
         {
-            var enityClassName = excelName + "Entity";
-            scriptFieldContent = $"public List<{enityClassName}> {sheetStructs[0].SheetName};";
+            string enityClassName = excelName + "Entity";
+            scriptFieldContent = $"    public List<{enityClassName}> {sheetStructs[0].SheetName};";
         }
         else
         {
-            foreach (var sheetStruct in sheetStructs)
+            foreach (SheetStruct sheetStruct in sheetStructs)
             {
-                var enityClassName = excelName + "Entity" + "_" + sheetStruct.SheetName;
-                scriptFieldContent += $"public List<{enityClassName}> {sheetStruct.SheetName};\n";
+                string enityClassName = excelName + "Entity" + "_" + sheetStruct.SheetName;
+                scriptFieldContent += $"    public List<{enityClassName}> {sheetStruct.SheetName};\n";
             }
         }
         return scriptFieldContent;
@@ -141,12 +153,16 @@ public class ExcelAssetScriptMenu
 
     private static string BuildScriptContent(string excelName, List<SheetStruct> sheetStructs)
     {
-        var templateString = GetScriptTemplate();
-        var entityTemplateStringMatch = Regex.Match(templateString,
+        string templateString = GetScriptTemplate();
+        Match entityTemplateStringMatch = Regex.Match(templateString,
             "#BEGINASSETENITYNAMEDEFINE#(.*?)#ENDASSETENITYNAMEDEFINE#", RegexOptions.Singleline);
-        if (!entityTemplateStringMatch.Success) throw new Exception("Script template format error.");
-        var entityTemplateString = entityTemplateStringMatch.Groups[1].Value.Trim();
-        // π§◊˜±ÌŒ™1∏ˆ ±£¨≤ª«¯∑÷π§◊˜±Ì√˚≥∆
+        if (!entityTemplateStringMatch.Success)
+        {
+            throw new Exception("Script template format error.");
+        }
+
+        string entityTemplateString = entityTemplateStringMatch.Groups[1].Value.Trim();
+        // Â∑•‰ΩúË°®‰∏∫1‰∏™Êó∂Ôºå‰∏çÂå∫ÂàÜÂ∑•‰ΩúË°®ÂêçÁß∞
         if (sheetStructs.Count == 1)
         {
             entityTemplateString = BuildScriptEnityContent(entityTemplateString, excelName, "",
@@ -154,16 +170,16 @@ public class ExcelAssetScriptMenu
         }
         else
         {
-            var entityStrings = "";
-            foreach (var sheetStruct in sheetStructs)
+            string entityStrings = "";
+            foreach (SheetStruct sheetStruct in sheetStructs)
             {
                 entityStrings += BuildScriptEnityContent(entityTemplateString, excelName, sheetStruct.SheetName,
                     sheetStruct.Fields);
             }
             entityTemplateString = entityStrings;
         }
-        var scriptFields = BuildScriptFields(excelName, sheetStructs);
-        var result = templateString.Replace(entityTemplateStringMatch.Value, entityTemplateString);
+        string scriptFields = BuildScriptFields(excelName, sheetStructs);
+        string result = templateString.Replace(entityTemplateStringMatch.Value, entityTemplateString);
         result = result.Replace("#ASSETSCRIPTNAME#", excelName);
         result = result.Replace("#ASSETSCRIPTFIELDS#", scriptFields);
         return result;

@@ -1,38 +1,37 @@
 using System;
 using System.IO;
-using System.Text.RegularExpressions;
 
 /// <summary>
-/// ÓÃÓÚ¶ÁĞ´ÎÄ¼şÊ±×Ô¶¯½«»»ĞĞ·ûÍ³Ò»´¦ÀíÎª\nµÄ¹¤¾ßÀà
+/// ç”¨äºè¯»å†™æ–‡ä»¶æ—¶è‡ªåŠ¨å°†æ¢è¡Œç¬¦ç»Ÿä¸€å¤„ç†ä¸º\nçš„å·¥å…·ç±»
 /// </summary>
 public static class NewlineNormalizer
 {
     /// <summary>
-    /// ¶ÁÈ¡ÎÄ¼ş²¢½«ËùÓĞÆ½Ì¨µÄ»»ĞĞ·ûÍ³Ò»×ª»»Îª\n
+    /// è¯»å–æ–‡ä»¶å¹¶å°†æ‰€æœ‰å¹³å°çš„æ¢è¡Œç¬¦ç»Ÿä¸€è½¬æ¢ä¸º\n
     /// </summary>
-    /// <param name="filePath">ÎÄ¼şÂ·¾¶</param>
-    /// <returns>Í³Ò»»»ĞĞ·ûÎª\nµÄÎÄ¼şÄÚÈİ</returns>
+    /// <param name="filePath">æ–‡ä»¶è·¯å¾„</param>
+    /// <returns>ç»Ÿä¸€æ¢è¡Œç¬¦ä¸º\nçš„æ–‡ä»¶å†…å®¹</returns>
     public static string Read(string filePath)
     {
-        // ¶ÁÈ¡Ô­Ê¼ÎÄ¼şÄÚÈİ
+        // è¯»å–åŸå§‹æ–‡ä»¶å†…å®¹
         string originalContent = File.ReadAllText(filePath);
 
-        // ½«ËùÓĞ¿ÉÄÜµÄ»»ĞĞ·ûĞòÁĞ(\r\n, \r, \n)Í³Ò»×ª»»Îª\n
+        // å°†æ‰€æœ‰å¯èƒ½çš„æ¢è¡Œç¬¦åºåˆ—(\r\n, \r, \n)ç»Ÿä¸€è½¬æ¢ä¸º\n
         string normalizedContent = originalContent.Replace("\r\n", "\n").Replace("\r", "\n");
 
         return normalizedContent;
     }
 
     /// <summary>
-    /// ½«ÄÚÈİĞ´ÈëÎÄ¼ş£¬±£³Ö»»ĞĞ·ûÎª\n£¨²»×Ô¶¯×ª»»ÎªÆ½Ì¨ÌØ¶¨¸ñÊ½£©
+    /// å°†å†…å®¹å†™å…¥æ–‡ä»¶ï¼Œä¿æŒæ¢è¡Œç¬¦ä¸º\nï¼ˆä¸è‡ªåŠ¨è½¬æ¢ä¸ºå¹³å°ç‰¹å®šæ ¼å¼ï¼‰
     /// </summary>
-    /// <param name="filePath">ÎÄ¼şÂ·¾¶</param>
-    /// <param name="content">°üº¬\n»»ĞĞ·ûµÄÄÚÈİ</param>
+    /// <param name="filePath">æ–‡ä»¶è·¯å¾„</param>
+    /// <param name="content">åŒ…å«\næ¢è¡Œç¬¦çš„å†…å®¹</param>
     public static void Write(string filePath, string content)
     {
-        // ½«ÄÚÈİÖĞµÄ\nÌæ»»Îªµ±Ç°Æ½Ì¨»»ĞĞ·û
+        // å°†å†…å®¹ä¸­çš„\næ›¿æ¢ä¸ºå½“å‰å¹³å°æ¢è¡Œç¬¦
         string platformContent = content.Replace("\n", Environment.NewLine);
-        // Ğ´ÈëÎÄ¼ş£¬Ê¹ÓÃÄ¬ÈÏ±àÂë
+        // å†™å…¥æ–‡ä»¶ï¼Œä½¿ç”¨é»˜è®¤ç¼–ç 
         File.WriteAllText(filePath, platformContent);
     }
 }
