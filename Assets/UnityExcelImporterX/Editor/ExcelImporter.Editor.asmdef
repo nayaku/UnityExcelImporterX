@@ -15,8 +15,6 @@
         "NPOI.OOXML.dll",
         "NPOI.OpenXml4Net.dll",
         "NPOI.OpenXmlFormats.dll",
-        "BouncyCastle.Cryptography.dll",
-        "System.Text.Encoding.CodePages.dll",
         "Newtonsoft.Json.dll"
     ],
     "autoReferenced": false,
