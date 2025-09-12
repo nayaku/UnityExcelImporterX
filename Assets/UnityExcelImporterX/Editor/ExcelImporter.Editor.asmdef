@@ -1,0 +1,26 @@
+{
+    "name": "ExcelImporter.Editor",
+    "rootNamespace": "",
+    "references": [
+        "ExcelImporter.ExcelImporter"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "NPOI.Core.dll",
+        "NPOI.OOXML.dll",
+        "NPOI.OpenXml4Net.dll",
+        "NPOI.OpenXmlFormats.dll",
+        "BouncyCastle.Cryptography.dll",
+        "System.Text.Encoding.CodePages.dll",
+        "Newtonsoft.Json.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

@@ -20,7 +20,7 @@ public class ExcelAssetScriptMenu
     private const string ScriptTemplateName = "ExcelAssetScriptTemplete.cs.txt";
 
     [MenuItem("Assets/Create/ExcelAssetScript", false)]
-    private static void CreateScript()
+    public static void CreateScript()
     {
         // 选中文件
         UnityEngine.Object[] selectedAssets = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets);
@@ -45,7 +45,7 @@ public class ExcelAssetScriptMenu
     }
 
     [MenuItem("Assets/Create/ExcelAssetScript", true)]
-    private static bool CreateScriptValidation()
+    public static bool CreateScriptValidation()
     {
         UnityEngine.Object[] selectedAssets = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets);
         if (selectedAssets.Length != 1)
@@ -126,7 +126,7 @@ public class ExcelAssetScriptMenu
             }
             fields += $"    public {field.FieldType} {field.FieldName};\n";
         }
-        entityTemplateString = entityTemplateString.Replace("#ASSETENITYFIELDS#", fields);
+        entityTemplateString = entityTemplateString.Replace("#ASSETENITYFIELDS#\n", fields);
         entityTemplateString += "\n";
         return entityTemplateString;
     }
@@ -174,14 +174,14 @@ public class ExcelAssetScriptMenu
             foreach (SheetStruct sheetStruct in sheetStructs)
             {
                 entityStrings += BuildScriptEnityContent(entityTemplateString, excelName, sheetStruct.SheetName,
-                    sheetStruct.Fields);
+                    sheetStruct.Fields) + "\n";
             }
             entityTemplateString = entityStrings;
         }
         string scriptFields = BuildScriptFields(excelName, sheetStructs);
         string result = templateString.Replace(entityTemplateStringMatch.Value, entityTemplateString);
         result = result.Replace("#ASSETSCRIPTNAME#", excelName);
-        result = result.Replace("#ASSETSCRIPTFIELDS#", scriptFields);
+        result = result.Replace("#ASSETSCRIPTFIELDS#\n", scriptFields);
         return result;
     }
 }

@@ -1,5 +1,6 @@
 using NPOI.HSSF.UserModel;
 using NPOI.SS.UserModel;
+using NPOI.SS.Util;
 using NPOI.XSSF.UserModel;
 using System;
 using System.Collections;
@@ -105,28 +106,31 @@ public class ExcelImporter : AssetPostprocessor
         return Path.GetExtension(excelPath) == ".xls" ? new HSSFWorkbook(stream) : new XSSFWorkbook(stream);
     }
 
-    private static object CellToFieldObject(ICell cell, FieldInfo fieldInfo, bool isFormulaEvalute = false)
+    private static object CellToFieldObject(ICell cell, Type fieldType, bool isFormulaEvalute = false)
     {
         CellType type = isFormulaEvalute ? cell.CachedFormulaResultType : cell.CellType;
 
         switch (type)
         {
             case CellType.String:
-                return fieldInfo.FieldType.IsEnum ? Enum.Parse(fieldInfo.FieldType, cell.StringCellValue) : cell.StringCellValue;
+                return ConvertHelper.ChangeType(cell.StringCellValue, fieldType);
             case CellType.Boolean:
-                return cell.BooleanCellValue;
+                return ConvertHelper.ChangeType(cell.BooleanCellValue, fieldType);
             case CellType.Numeric:
-                return Convert.ChangeType(cell.NumericCellValue, fieldInfo.FieldType);
+                short format = cell.CellStyle.DataFormat;
+                return format != 0
+                    ? ConvertHelper.ChangeType(cell.DateCellValue, fieldType)
+                    : ConvertHelper.ChangeType(cell.NumericCellValue, fieldType);
             case CellType.Formula:
                 if (isFormulaEvalute)
                 {
                     return null;
                 }
-                return CellToFieldObject(cell, fieldInfo, true);
+                return CellToFieldObject(cell, fieldType, true);
             default:
-                if (fieldInfo.FieldType.IsValueType)
+                if (fieldType.IsValueType)
                 {
-                    return Activator.CreateInstance(fieldInfo.FieldType);
+                    return Activator.CreateInstance(fieldType);
                 }
                 return null;
         }
@@ -161,12 +165,19 @@ public class ExcelImporter : AssetPostprocessor
 
             try
             {
-                object fieldValue = CellToFieldObject(cell, entityField);
+                object fieldValue = CellToFieldObject(cell, entityField.FieldType);
                 entityField.SetValue(entity, fieldValue);
             }
-            catch
+            catch (Exception ex)
             {
-                throw new Exception(string.Format("Invalid excel cell type at row {0}, column {1}, {2} sheet.", row.RowNum, cell.ColumnIndex, sheetName));
+                CellReference temp = new(cell);
+                string reference = temp.FormatAsString();
+                throw new Exception(
+                    string.Format("Invalid excel cell type at {0}, {1} sheet, value: {2}.\n{3}",
+                    reference,
+                    sheetName,
+                    cell.ToString(),
+                    ex.Message));
             }
         }
 

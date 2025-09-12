@@ -86,3 +86,12 @@ gen
 # NuGetForUnity
 Assets/Packages/
 Assets/Packages.meta
+
+#vscode
+.vscode
+
+# Local History for Visual Studio Code
+.history/
+
+# Built Visual Studio Code Extensions
+*.vsix

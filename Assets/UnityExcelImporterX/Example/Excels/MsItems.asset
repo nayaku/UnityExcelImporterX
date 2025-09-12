@@ -73,13 +73,61 @@ MonoBehaviour:
     isNotForSale: 1
     rate: 8.05
     category: 0
-  equip:
+  itemEx:
   - id: 1
     name: "\u6811\u679D"
+    sex: 30007
     hit: 1
+    activate: 1
+    createTime:
+      ticks: 0
+    createDate:
+      ticks: 0
+    longNum: 123
+    expList: 0a000000140000001e00000028000000
+    descriptList:
+    - "\u63CF\u8FF01"
+    - "\u63CF\u8FF02"
+    point: {x: 0, y: 3, z: 2}
   - id: 2
     name: "\u6253\u72D7\u68D2"
+    sex: 22899
     hit: 1.3
+    activate: 0
+    createTime:
+      ticks: 0
+    createDate:
+      ticks: 0
+    longNum: 2017001
+    expList: 05000000070000001400000028000000
+    descriptList:
+    - "\u63CF\u8FF01"
+    point: {x: 0, y: 4, z: 0}
   - id: 3
     name: "\u5496\u5496\u55B1\u68D2"
+    sex: 30007
     hit: 99.99
+    activate: 1
+    createTime:
+      ticks: 0
+    createDate:
+      ticks: 0
+    longNum: 20151224
+    expList: 63000000
+    descriptList:
+    - "\u63CF\u8FF01"
+    - "\u63CF\u8FF04"
+    point: {x: 1, y: 0, z: 0}
+  - id: 4
+    name: 
+    sex: 0
+    hit: 0
+    activate: 0
+    createTime:
+      ticks: 0
+    createDate:
+      ticks: 0
+    longNum: 0
+    expList: 
+    descriptList: []
+    point: {x: 0, y: 0, z: 0}
