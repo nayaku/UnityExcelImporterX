@@ -28,17 +28,37 @@ public class ExcelAssetScriptMenu
         string assetPath = AssetDatabase.GetAssetPath(selectedAsset);
         string assetName = Path.GetFileName(assetPath);
         string assetDirectory = Path.GetDirectoryName(assetPath);
-
-        // 选择保存路径
-        string newScriptName = Path.ChangeExtension(assetName, "cs");
-        string savePath = EditorUtility.SaveFilePanel("Save ExcelAssetScript", assetDirectory, newScriptName, "cs");
-        if (string.IsNullOrEmpty(savePath))
+        if (selectedAssets.Length == 1)
         {
-            return;
-        }
+            // 选择保存路径
+            string newScriptName = Path.ChangeExtension(assetName, "cs");
+            string savePath = EditorUtility.SaveFilePanel("Save ExcelAssetScript", assetDirectory, newScriptName, "cs");
+            if (string.IsNullOrEmpty(savePath))
+            {
+                return;
+            }
 
-        // 生成脚本
-        CreateScript(assetPath, savePath);
+            // 生成脚本
+            CreateScript(assetPath, savePath);
+        }
+        else
+        {
+            string saveDirectory = EditorUtility.OpenFolderPanel("Save ExcelAssetScripts", assetDirectory, "");
+            if (string.IsNullOrEmpty(saveDirectory))
+            {
+                return;
+            }
+            foreach (UnityEngine.Object obj in selectedAssets)
+            {
+                // 选择保存文件夹
+                string path = AssetDatabase.GetAssetPath(obj);
+                string name = Path.GetFileNameWithoutExtension(path);
+                string savePath = Path.Combine(saveDirectory, name + ".cs");
+
+                // 生成脚本
+                CreateScript(path, savePath);
+            }
+        }
 
         // 刷新资源
         AssetDatabase.Refresh();
@@ -48,13 +68,27 @@ public class ExcelAssetScriptMenu
     public static bool CreateScriptValidation()
     {
         UnityEngine.Object[] selectedAssets = Selection.GetFiltered(typeof(UnityEngine.Object), SelectionMode.Assets);
-        if (selectedAssets.Length != 1)
+        if (selectedAssets.Length == 0)
         {
             return false;
         }
-
-        string path = AssetDatabase.GetAssetPath(selectedAssets[0]);
-        return Path.GetExtension(path) is ".xls" or ".xlsx";
+        foreach (UnityEngine.Object obj in selectedAssets)
+        {
+            if (obj == null)
+            {
+                return false;
+            }
+            string path = AssetDatabase.GetAssetPath(selectedAssets[0]);
+            if (string.IsNullOrEmpty(path))
+            {
+                return false;
+            }
+            if (Path.GetExtension(path) is not (".xls" or ".xlsx"))
+            {
+                return false;
+            }
+        }
+        return true;
     }
 
     private static void CreateScript(string assetPath, string savePath)
