@@ -79,7 +79,7 @@ public class MsItemsEntity_itemEx
     /// <summary>
     /// 集合
     /// </summary>
-    public Dictionary<string,int> dict;
+    public Dictionary<string, int> dict;
     /// <summary>
     /// 自定义类
     /// </summary>
