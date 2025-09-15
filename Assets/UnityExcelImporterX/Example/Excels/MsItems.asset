@@ -79,10 +79,6 @@ MonoBehaviour:
     sex: 30007
     hit: 1
     activate: 1
-    createTime:
-      ticks: 0
-    createDate:
-      ticks: 0
     longNum: 123
     expList: 0a000000140000001e00000028000000
     descriptList:
@@ -94,10 +90,6 @@ MonoBehaviour:
     sex: 22899
     hit: 1.3
     activate: 0
-    createTime:
-      ticks: 0
-    createDate:
-      ticks: 0
     longNum: 2017001
     expList: 05000000070000001400000028000000
     descriptList:
@@ -108,10 +100,6 @@ MonoBehaviour:
     sex: 30007
     hit: 99.99
     activate: 1
-    createTime:
-      ticks: 0
-    createDate:
-      ticks: 0
     longNum: 20151224
     expList: 63000000
     descriptList:
@@ -123,10 +111,6 @@ MonoBehaviour:
     sex: 0
     hit: 0
     activate: 0
-    createTime:
-      ticks: 0
-    createDate:
-      ticks: 0
     longNum: 0
     expList: 
     descriptList: []

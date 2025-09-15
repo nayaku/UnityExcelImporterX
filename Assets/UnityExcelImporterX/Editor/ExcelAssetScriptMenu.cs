@@ -138,7 +138,7 @@ public class ExcelAssetScriptMenu
         if (sheetStructs.Count == 1)
         {
             string enityClassName = excelName + "Entity";
-            scriptFieldContent = $"    public List<{enityClassName}> {sheetStructs[0].SheetName};";
+            scriptFieldContent = $"    public List<{enityClassName}> {sheetStructs[0].SheetName};\n";
         }
         else
         {
@@ -166,7 +166,7 @@ public class ExcelAssetScriptMenu
         if (sheetStructs.Count == 1)
         {
             entityTemplateString = BuildScriptEnityContent(entityTemplateString, excelName, "",
-                sheetStructs[0].Fields);
+                sheetStructs[0].Fields) + "\n";
         }
         else
         {

@@ -51,11 +51,11 @@ public class MsItemsEntity_itemEx
     /// <summary>
     /// 时间
     /// </summary>
-    public SerializableDateTime createTime;
+    public DateTime createTime;
     /// <summary>
     /// 日期
     /// </summary>
-    public SerializableDateTime createDate;
+    public DateTime createDate;
     /// <summary>
     /// 长得像日期的数字
     /// </summary>
@@ -80,6 +80,10 @@ public class MsItemsEntity_itemEx
     /// 集合
     /// </summary>
     public Dictionary<string,int> dict;
+    /// <summary>
+    /// 自定义类
+    /// </summary>
+    public MstItemCustomType customType;
 }
 
 
