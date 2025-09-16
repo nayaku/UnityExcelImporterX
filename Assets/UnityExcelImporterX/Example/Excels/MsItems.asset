@@ -85,6 +85,9 @@ MonoBehaviour:
     - "\u63CF\u8FF01"
     - "\u63CF\u8FF02"
     point: {x: 0, y: 3, z: 2}
+    customType:
+      x: 1
+      s: 
   - id: 2
     name: "\u6253\u72D7\u68D2"
     sex: 22899
@@ -95,6 +98,9 @@ MonoBehaviour:
     descriptList:
     - "\u63CF\u8FF01"
     point: {x: 0, y: 4, z: 0}
+    customType:
+      x: 1
+      s: ss
   - id: 3
     name: "\u5496\u5496\u55B1\u68D2"
     sex: 30007
@@ -106,6 +112,9 @@ MonoBehaviour:
     - "\u63CF\u8FF01"
     - "\u63CF\u8FF04"
     point: {x: 1, y: 0, z: 0}
+    customType:
+      x: 0
+      s: 
   - id: 4
     name: 
     sex: 0
@@ -115,3 +124,6 @@ MonoBehaviour:
     expList: 
     descriptList: []
     point: {x: 0, y: 0, z: 0}
+    customType:
+      x: 0
+      s: 
