@@ -22,6 +22,18 @@
 3. 双击文件或在Unity中通过 **Assets → Import Package → Custom Package** 导入
 </details>
 
+<details>
+<summary>💡 通过 OpenUPM 安装</summary>
+
+该包已发布至 <a href="https://openupm.com/packages/net.nayaku.unity-excel-importer-x/">OpenUPM</a> 仓库。
+安装前请确保您的项目已安装`NPOI`和`Newtonsoft.Json`依赖包。
+
+```
+openupm add net.nayaku.unity-excel-importer-x
+```
+
+</details>
+
 ## 🚀 快速开始
 
 ### 步骤1：创建Excel文件
