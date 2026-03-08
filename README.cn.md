@@ -26,10 +26,25 @@
 <summary>💡 通过 OpenUPM 安装</summary>
 
 该包已发布至 <a href="https://openupm.com/packages/net.nayaku.unity-excel-importer-x/">OpenUPM</a> 仓库。
-安装前请确保您的项目已安装`NPOI`和`Newtonsoft.Json`依赖包。
+安装前请确保您的项目已安装 `NPOI` 和 `Newtonsoft.Json` 依赖包。
 
 ```
 openupm add net.nayaku.unity-excel-importer-x
+```
+
+</details>
+
+<details>
+<summary>💡 通过 Package Manager 以 GIT 依赖方式安装</summary>
+
+请确保您的项目已安装 `NPOI` 和 `Newtonsoft.Json` 依赖包。
+
+1. 打开 Package Manager 窗口（菜单：Window | Package Manager）
+2. 点击窗口左上角的 `+` 按钮，选择 "Add package from git URL..."
+3. 输入以下 URL 并点击 `Add` 按钮
+
+```
+https://github.com/nayaku/UnityExcelImporterX.git?path=Assets/UnityExcelImporterX
 ```
 
 </details>
