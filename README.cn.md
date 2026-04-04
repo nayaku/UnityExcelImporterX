@@ -11,6 +11,7 @@
 - **智能注释**：支持注释行/列，设置数据边界
 - **类型丰富**：支持基本类型、枚举、数组、字典、日期时间和自定义类型
 - **多表支持**：一次性导入Excel中的所有工作表
+- **功能简单**：无需配置，直接导入即可
 
 ## 需求
 
@@ -54,7 +55,7 @@ https://github.com/nayaku/UnityExcelImporterX.git?path=Assets/UnityExcelImporter
 
 </details>
 
-## 🚀 快速开始
+## 快速开始
 
 ### 步骤1：创建Excel文件
 
@@ -67,10 +68,10 @@ https://github.com/nayaku/UnityExcelImporterX.git?path=Assets/UnityExcelImporter
 | **第3行** | 注释说明 | `编号`, `物品名`, `售价` |
 | **第4行+** | 实际数据 | `1`, `物品名1`, `99.5` |
 
-📋 **示例表格结构：**
-![image-20250915154749933](./README.cn.assets/image-20250915154749933.png)
+**示例表格结构：**
+![示例表格结构图](./README.cn.assets/image-20250915154749933.png)
 
-🎯 **将Excel文件放入Unity项目的任意文件夹中**
+将Excel文件放入Unity项目的任意文件夹中即可。
 
 ### 步骤2：自动生成代码
 
@@ -78,9 +79,9 @@ https://github.com/nayaku/UnityExcelImporterX.git?path=Assets/UnityExcelImporter
 2. **右键 → Create → ExcelAssetScript**（或在顶部菜单选择 **Assets → Create → ExcelAssetScript**）
 3. **系统将自动个实体类脚本**（如 `MstItems.cs`）
 
-![image-20250910174623347](D:\code\unity\UnityExcelImporterX\README.assets\image-20250910174623347.png)
+![image-20250910174623347](./README.assets/image-20250910174623347.png)
 
-📊 **生成的代码示例：**
+**生成的代码示例：**
 
 ```c#
 // 实体类 - 对应表格的每一行数据
@@ -109,25 +110,28 @@ public class MstItems : ScriptableObject
 }
 ```
 
-⚠️ **重要提醒**：当Excel表格结构发生变化时（如添加/删除列），需要重新执行此步骤生成最新代码。
+> [!WARNING]  
+> **重要提醒**：当Excel表格结构发生变化时（如添加/删除列），需要重新执行此步骤生成最新代码。
 
 ### 步骤3：自动导入数据
 
-💡 **只需简单操作**：
+**只需简单操作**：
 - **保存Excel文件**（Ctrl+S）
 - **回到Unity**，系统将自动检测变更并导入数据
 - **在相同目录下**会生成与Excel同名的 `.asset` 文件
 
  **如果没有自动生成，可以手动重新导入Excel文件来触发自动生成：**
-![image-20250910174734537](D:\code\unity\UnityExcelImporterX\README.assets\image-20250910174734537.png)
+![image-20250910174734537](./README.assets/image-20250910174734537.png)
 
-✅ **完成！** 现在您可以在Unity中直接查看和编辑导入的数据：
+### 完成
+
+现在您可以在Unity中直接查看和编辑导入的数据：
 
 ![image-20250915155540723](./README.cn.assets/image-20250915155540723.png)
 
 
 
-## 🎯 高级功能详解
+## 高级功能详解
 
 ### 注释功能
 
@@ -264,7 +268,7 @@ public class MstItems : ScriptableObject
     public List<MstItemsEntity> Entities;
 }
 ```
-## 🔧 常见问题
+## 常见问题
 
 <details>
 <summary>Q: Excel修改后没有自动更新？</summary>
@@ -275,7 +279,7 @@ public class MstItems : ScriptableObject
 3. 检查控制台是否有错误信息
 </details>
 
-## 📄 许可证
+## 许可证
 
 本库采用 [MIT许可证](LICENSE.txt)。
 
