@@ -115,7 +115,6 @@ public class MstItems : ScriptableObject
 
 ### 步骤3：自动导入数据
 
-**只需简单操作**：
 - **保存Excel文件**（Ctrl+S）
 - **回到Unity**，系统将自动检测变更并导入数据
 - **在相同目录下**会生成与Excel同名的 `.asset` 文件
