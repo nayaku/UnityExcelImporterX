@@ -16,10 +16,9 @@ public class ExcelImporter : AssetPostprocessor
     {
         public Type AssetType { get; set; }
         public ExcelAssetAttribute Attribute { get; set; }
-        public string ExcelName => string.IsNullOrEmpty(Attribute.ExcelName) ? AssetType.Name : Attribute.ExcelName;
     }
 
-    private static Dictionary<string, ExcelAssetInfo> cachedInfos = null;
+    private static Dictionary<string, ExcelAssetInfo> cachedInfos = null; // 缓存 Excel 名称到 ExcelAssetInfo 的映射
 
     private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
