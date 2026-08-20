@@ -110,7 +110,7 @@ public static class ExcelAssetHelper
                 hasKeyField = true;
             }
 
-            string fieldComment = commentCell?.StringCellValue?.Trim() ?? "";
+            string fieldComment = commentCell?.ToString()?.Trim() ?? "";
 
             SheetField field = new()
             {
@@ -128,7 +128,8 @@ public static class ExcelAssetHelper
     {
         List<SheetStruct> sheetStructs = new();
         using FileStream stream = File.Open(excelPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        IWorkbook book = Path.GetExtension(excelPath) == ".xls" ? new HSSFWorkbook(stream) : new XSSFWorkbook(stream);
+        IWorkbook book = Path.GetExtension(excelPath).Equals(".xls", StringComparison.OrdinalIgnoreCase) ?
+            new HSSFWorkbook(stream) : new XSSFWorkbook(stream);
         bool anyHasKeyField = false;
         HashSet<string> sheetNameSet = new();
         for (int i = 0; i < book.NumberOfSheets; i++)

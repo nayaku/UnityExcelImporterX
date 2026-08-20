@@ -75,7 +75,8 @@ public class ExcelAssetScriptMenu
             {
                 return false;
             }
-            if (Path.GetExtension(path) is not (".xls" or ".xlsx"))
+            if (!Path.GetExtension(path).Equals(".xls", StringComparison.OrdinalIgnoreCase) &&
+                !Path.GetExtension(path).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
             {
                 return false;
             }

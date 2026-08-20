@@ -25,7 +25,8 @@ public class ExcelImporter : AssetPostprocessor
         bool imported = false;
         foreach (string path in importedAssets)
         {
-            if (Path.GetExtension(path) is not (".xls" or ".xlsx"))
+            if (!Path.GetExtension(path).Equals(".xls", StringComparison.OrdinalIgnoreCase) &&
+                !Path.GetExtension(path).Equals(".xlsx", StringComparison.OrdinalIgnoreCase))
             {
                 continue;
             }
@@ -95,8 +96,8 @@ public class ExcelImporter : AssetPostprocessor
 
         if (asset == null)
         {
-            asset = ScriptableObject.CreateInstance(assetType.Name);
-            AssetDatabase.CreateAsset((ScriptableObject)asset, assetPath);
+            asset = ScriptableObject.CreateInstance(assetType);
+            AssetDatabase.CreateAsset(asset, assetPath);
             //asset.hideFlags = HideFlags.NotEditable;
         }
 
@@ -106,7 +107,8 @@ public class ExcelImporter : AssetPostprocessor
     private static IWorkbook LoadBook(string excelPath)
     {
         using FileStream stream = File.Open(excelPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite);
-        return Path.GetExtension(excelPath) == ".xls" ? new HSSFWorkbook(stream) : new XSSFWorkbook(stream);
+        return Path.GetExtension(excelPath).Equals(".xls", StringComparison.OrdinalIgnoreCase) ?
+            new HSSFWorkbook(stream) : new XSSFWorkbook(stream);
     }
 
     private static object CellToFieldObject(ICell cell, Type fieldType, bool isFormulaEvalute = false)
@@ -148,7 +150,7 @@ public class ExcelImporter : AssetPostprocessor
         {
             string columnName = columnNames[i];
             // 注释列
-            if(columnName == null)
+            if (columnName == null)
             {
                 continue;
             }

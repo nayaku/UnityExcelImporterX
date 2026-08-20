@@ -24,7 +24,7 @@ public class ConvertHelper
         #region Enum
         if (typeof(Enum).IsAssignableFrom(conversionType))
         {
-            return Enum.Parse(conversionType, obj.ToString());
+            return Enum.Parse(conversionType, obj.ToString(), ignoreCase: true);
         }
 
         #endregion
