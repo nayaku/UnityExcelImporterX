@@ -31,6 +31,7 @@ public class SheetStruct
 
 public static class ExcelAssetHelper
 {
+    private static readonly CSharpCodeProvider _provider = new();
     /// <summary>
     /// 从Excel表头获取字段信息
     /// </summary>
@@ -67,13 +68,25 @@ public static class ExcelAssetHelper
                 continue;
             }
             // 空白列视为结束
-            if (nameCell.CellType == CellType.Blank || typeCell.CellType == CellType.Blank ||
-                (nameCell.CellType == CellType.String && nameCell.StringCellValue.Trim() == ""))
+            if (nameCell.CellType == CellType.Blank || typeCell.CellType == CellType.Blank)
             {
                 break;
             }
-
-            string[] nameItem = nameCell.StringCellValue.Split(',', System.StringSplitOptions.RemoveEmptyEntries);
+            // 检查字段名和字段类型是否为字符串类型
+            if (nameCell.CellType != CellType.String || typeCell.CellType != CellType.String)
+            {
+                throw new Exception($"Invalid cell type in sheet '{sheet.SheetName}' at column " +
+                    $"{ExcelHelper.ColIndexToName(j + 1)}({j + 1}). " +
+                    $"Expected string type for field name and field type.");
+            }
+            string nameValue = nameCell.StringCellValue.Trim();
+            string fieldType = typeCell.StringCellValue.Trim();
+            // 空白字符列视为结束
+            if (nameValue.Length == 0 || fieldType.Length == 0)
+            {
+                break;
+            }
+            string[] nameItem = nameCell.StringCellValue.Split(',', StringSplitOptions.RemoveEmptyEntries);
             string fieldName = nameItem[0].Trim();
             // 检查字段名是否重复
             if (!fieldSet.Add(fieldName))
@@ -82,13 +95,13 @@ public static class ExcelAssetHelper
             }
 
             // 检查字段名是否为有效的C#标识符
-            using (CodeDomProvider provider = new CSharpCodeProvider())
+            if (!_provider.IsValidIdentifier(fieldName))
             {
-                if (!provider.IsValidIdentifier(fieldName))
-                {
-                    string columnIndexName = ExcelHelper.ColIndexToName(j + 1);
-                    throw new System.Exception($"Invalid field name '{fieldName}' in column {columnIndexName}({j + 1}) of sheet '{sheet.SheetName}'.");
-                }
+                string columnIndexName = ExcelHelper.ColIndexToName(j + 1);
+                throw new Exception($"Invalid C# identifier '{fieldName}' " +
+                    $"in column {columnIndexName}({j + 1}) of sheet '{sheet.SheetName}'. " +
+                    $"Field names must start with a letter or underscore and contain only letters, " +
+                    $"digits, and underscores.");
             }
             // 检查是否为主键字段
             bool isKey = nameItem.Length > 1 && nameItem[1].Trim().ToLower() == "key";
@@ -97,7 +110,6 @@ public static class ExcelAssetHelper
                 hasKeyField = true;
             }
 
-            string fieldType = typeCell.StringCellValue.Trim();
             string fieldComment = commentCell?.StringCellValue?.Trim() ?? "";
 
             SheetField field = new()
@@ -140,17 +152,14 @@ public static class ExcelAssetHelper
             }
 
             // 检查表名是否为有效的C#标识符
-            using (CodeDomProvider provider = new CSharpCodeProvider())
+            if (!_provider.IsValidIdentifier(sheetName))
             {
-                if (!provider.IsValidIdentifier(sheetName))
-                {
-                    throw new Exception($"Invalid sheet name '{sheetName}' in Excel file '{excelPath}'.");
-                }
+                throw new Exception($"Invalid sheet name '{sheetName}' in Excel file '{excelPath}'.");
             }
 
             SheetStruct sheetStruct = new()
             {
-                SheetName = sheet.SheetName,
+                SheetName = sheetName,
                 Fields = sheetfields,
                 HasKeyField = hasKeyField
             };

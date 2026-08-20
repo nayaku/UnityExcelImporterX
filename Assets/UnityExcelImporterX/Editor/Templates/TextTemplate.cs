@@ -74,7 +74,6 @@ public class TextTemplate
         VBlock block = new()
         {
             Range = new Range(0, 0),
-            EndRange = new Range(_template.Length, _template.Length),
         };
         int startIndex = -1;
         Stack<VBlock> blockStack = new();
@@ -170,12 +169,18 @@ public class TextTemplate
         {
             Debug.LogError($"Unmatched block in template at line {lineIndex + 1}, column {colIndex + 1}, expected closing block, ignoring...");
         }
-        _block = block;
+        // 默认EOF是万能的结束符，所有未闭合的块都以EOF结束
+        while (blockStack.Count > 0)
+        {
+            VBlock unclosedBlock = blockStack.Pop();
+            unclosedBlock.EndRange = new Range(_template.Length, _template.Length);
+        }
+        _block = block; 
     }
 
     public string Build(DictParams templateParams)
     {
-        StringBuilder sb = new();
+        StringBuilder sb = new(_template.Length * 4);
         VBlock block = _block;
         if (_block == null)
         {

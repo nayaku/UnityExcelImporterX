@@ -20,9 +20,9 @@ public class ExcelAssetScriptMenu
         if (selectedAssets.Length == 1)
         {
             // 选择保存路径
-            string newScriptName = Path.ChangeExtension(assetName, "txt");
+            string newScriptName = Path.ChangeExtension(assetName, "cs");
             string savePath =
-                EditorUtility.SaveFilePanel("Save ExcelAssetScript", assetDirectory, newScriptName, "txt");
+                EditorUtility.SaveFilePanel("Save ExcelAssetScript", assetDirectory, newScriptName, "cs");
             if (string.IsNullOrEmpty(savePath))
             {
                 return;
