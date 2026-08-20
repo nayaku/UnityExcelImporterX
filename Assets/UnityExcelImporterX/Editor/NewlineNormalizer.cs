@@ -17,9 +17,36 @@ public static class NewlineNormalizer
         string originalContent = File.ReadAllText(filePath);
 
         // 将所有可能的换行符序列(\r\n, \r, \n)统一转换为\n
-        string normalizedContent = originalContent.Replace("\r\n", "\n").Replace("\r", "\n");
+        string normalizedContent = NormalizeToLF(originalContent);
 
         return normalizedContent;
+    }
+
+    public static string NormalizeToLF(string text)
+    {
+        if (string.IsNullOrEmpty(text)) return text;
+        bool r = false;
+        // 将所有可能的换行符序列(\r\n, \r, \n)统一转换为\n
+        char[] result = new char[text.Length];
+        int j = 0;
+        for (int i = 0; i < result.Length; i++)
+        {
+            if (text[i] == '\r')
+            {
+                r = true;
+                result[j++] = '\n';
+                if (i + 1 < text.Length && text[i + 1] == '\n')
+                {
+                    i++; // Skip the next character if it's part of \r\n
+                }
+            }
+            else
+            {
+                result[j++] = text[i];
+            }
+        }
+        if (!r) return text; // 无需转换，直接返回原始文本
+        return new string(result, 0, j);
     }
 
     /// <summary>

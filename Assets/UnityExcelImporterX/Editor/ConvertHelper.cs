@@ -4,7 +4,6 @@ using System.Collections;
 using System.Reflection;
 using System.Threading;
 
-
 public class ConvertHelper
 {
     // https://blog.csdn.net/jayzai/article/details/50667435
@@ -23,7 +22,7 @@ public class ConvertHelper
         #endregion
 
         #region Enum
-        if (typeof(System.Enum).IsAssignableFrom(conversionType))
+        if (typeof(Enum).IsAssignableFrom(conversionType))
         {
             return Enum.Parse(conversionType, obj.ToString());
         }
@@ -70,14 +69,7 @@ public class ConvertHelper
             string objStr = ChangeType(obj, typeof(string), provider) as string;
             if (conversionType.IsClass || conversionType.IsValueType)
             {
-                try
-                {
-                    return JsonConvert.DeserializeObject(objStr, conversionType);
-                }
-                catch
-                {
-                    throw;
-                }
+                return JsonConvert.DeserializeObject(objStr, conversionType);
             }
             else
             {

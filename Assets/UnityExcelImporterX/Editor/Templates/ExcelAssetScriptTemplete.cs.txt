@@ -2,15 +2,69 @@ using System;
 using System.Collections.Generic;
 using UnityEngine;
 
-#BEGINASSETENITYNAMEDEFINE#
+#BEGINASSETENTITY#
 [Serializable]
-public class #ASSETENITYNAME#
+public class #ASSETENTITYNAME#
 {
-#ASSETENITYFIELDS#
+#BEGINASSETENTITYFIELDS#
+#BEGINASSETENTITYFIELDCOMMENT#
+    /// <summary>
+#BEGINASSETENTITYFIELDCOMMENTMUTILINE#
+    /// #ASSETENTITYFIELDCOMMENT#
+#ENDASSETENTITYFIELDCOMMENTMUTILINE#
+    /// </summary>
+#ENDASSETENTITYFIELDCOMMENT#
+    public #ASSETFIELDTYPE# #ASSETFIELDNAME#;
+#ENDASSETENTITYFIELDS#
 }
-#ENDASSETENITYNAMEDEFINE#
+
+#ENDASSETENTITY#
+#BEGINASSET#
 [ExcelAsset]
-public class #ASSETSCRIPTNAME# : ScriptableObject
+public class #ASSETNAME# : ScriptableObject#BEGINASSETWITHKEY#, ISerializationCallbackReceiver#ENDASSETWITHKEY#
 {
-#ASSETSCRIPTFIELDS#
+#BEGINASSETFIELDS#
+    public List<#ASSETENTITYNAME#> #ASSETENTITYLISTNAME# = new();
+#BEGINASSETSINGLEKEYFIELDS#
+    public Dictionary<#ASSETKEYFIELDTYPE#, #ASSETENTITYNAME#> #ASSETENTITYDICTNAME#;
+#ENDASSETSINGLEKEYFIELDS#
+#BEGINASSETMUTIKEYFIELDS#
+    public Dictionary<(#BEGINASSETKEYFIELDS##ASSETKEYFIELDTYPE# #ASSETKEYFIELDNAME##ASSETKEYFIELDSEPARATOR##ENDASSETKEYFIELDS#), #ASSETENTITYNAME#> #ASSETENTITYDICTNAME#;
+#ENDASSETMUTIKEYFIELDS#
+#ENDASSETFIELDS#
+#BEGINASSETMETHODS#
+
+    public void OnBeforeSerialize()
+    {
+        // Implement any logic needed before serialization
+    }
+
+    public void OnAfterDeserialize()
+    {
+        // Implement any logic needed after deserialization
+#BEGINONAFTERDESERIALIZE#
+        #ASSETENTITYDICTNAME# = new();
+        foreach (#ASSETENTITYNAME# item in #ASSETENTITYLISTNAME#)
+        {
+#BEGINASSETSINGLEKEYFIELDS#
+            var key = item.#ASSETKEYFIELDNAME#;
+#ENDASSETSINGLEKEYFIELDS#
+#BEGINASSETMUTIKEYFIELDS#
+            var key = (
+#BEGINASSETKEYFIELDNAMES#
+                item.#ASSETKEYFIELDNAME##ASSETKEYFIELDSEPARATOR#
+#ENDASSETKEYFIELDNAMES#
+            );
+#ENDASSETMUTIKEYFIELDS#
+            if (#ASSETENTITYDICTNAME#.ContainsKey(key))
+            {
+                Debug.LogError($"Duplicate key found in #ASSETENTITYDICTNAME# (script: #ASSETNAME#): {key}. Each key must be unique.");
+                continue; // Skip adding this item to the dictionary
+            }
+            #ASSETENTITYDICTNAME#[key] = item;
+        }
+#ENDONAFTERDESERIALIZE#
+    }
+#ENDASSETMETHODS#
 }
+#ENDASSET#

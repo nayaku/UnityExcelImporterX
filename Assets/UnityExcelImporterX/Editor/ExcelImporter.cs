@@ -26,35 +26,39 @@ public class ExcelImporter : AssetPostprocessor
         bool imported = false;
         foreach (string path in importedAssets)
         {
-            if (Path.GetExtension(path) is ".xls" or ".xlsx")
+            if (Path.GetExtension(path) is not (".xls" or ".xlsx"))
             {
-                if (cachedInfos == null)
-                {
-                    BuildExcelAssetInfoCache();
-                }
-
-                string excelName = Path.GetFileNameWithoutExtension(path);
-                if (excelName.StartsWith("~$"))
-                {
-                    continue;
-                }
-
-                bool ok = cachedInfos.TryGetValue(excelName, out ExcelAssetInfo info);
-                if (!ok)
-                {
-                    continue;
-                }
-
-                ImportExcel(path, info);
-                imported = true;
+                continue;
             }
+
+            if (cachedInfos == null)
+            {
+                BuildExcelAssetInfoCache();
+            }
+
+            string excelName = Path.GetFileNameWithoutExtension(path);
+            if (excelName.StartsWith("~$"))
+            {
+                continue;
+            }
+
+            bool ok = cachedInfos.TryGetValue(excelName, out ExcelAssetInfo info);
+            if (!ok)
+            {
+                continue;
+            }
+
+            ImportExcel(path, info);
+            imported = true;
         }
 
-        if (imported)
+        if (!imported)
         {
-            AssetDatabase.SaveAssets();
-            AssetDatabase.Refresh();
+            return;
         }
+
+        AssetDatabase.SaveAssets();
+        AssetDatabase.Refresh();
     }
 
     private static void BuildExcelAssetInfoCache()
@@ -143,8 +147,14 @@ public class ExcelImporter : AssetPostprocessor
 
         for (int i = 0; i < columnNames.Count; i++)
         {
+            string columnName = columnNames[i];
+            // 注释列
+            if(columnName == null)
+            {
+                continue;
+            }
             FieldInfo entityField = entityType.GetField(
-                columnNames[i],
+                columnName,
                 BindingFlags.Instance | BindingFlags.Public | BindingFlags.NonPublic
             );
             if (entityField == null)
@@ -186,8 +196,8 @@ public class ExcelImporter : AssetPostprocessor
 
     private static IList GetEntityListFromSheet(ISheet sheet, Type entityType)
     {
-        List<SheetField> sheetFields = ExcelAssetHelper.GetFieldFromSheetHeader(sheet);
-        List<string> excelColumnNames = sheetFields.ConvertAll(f => f.FieldName);
+        (List<SheetField> sheetFields, bool _) = ExcelAssetHelper.GetFieldFromSheetHeader(sheet);
+        List<string> excelColumnNames = sheetFields.ConvertAll(f => f?.FieldName);
 
         Type listType = typeof(List<>).MakeGenericType(entityType);
         IList entityList = (IList)Activator.CreateInstance(listType);
@@ -215,7 +225,7 @@ public class ExcelImporter : AssetPostprocessor
             }
 
             object entity = CreateEntityFromRow(row, excelColumnNames, entityType, sheet.SheetName);
-            _ = entityList.Add(entity);
+            entityList.Add(entity);
         }
         return entityList;
     }
