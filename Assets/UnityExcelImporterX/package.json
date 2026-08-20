@@ -1,7 +1,7 @@
 {
   "name": "net.nayaku.unity-excel-importer-x",
   "displayName": "Unity Excel ImporterX",
-  "version": "1.0.0",
+  "version": "1.1.0",
   "unity": "2021.3",
   "description": "Automatically import data from xls, xlsx file into custom ScriptableObject in the Unity Editor.",
   "license": "MIT",
