@@ -19,7 +19,7 @@ public class ExcelImporter : AssetPostprocessor
         public string ExcelName => string.IsNullOrEmpty(Attribute.ExcelName) ? AssetType.Name : Attribute.ExcelName;
     }
 
-    private static Dictionary<string, ExcelAssetInfo> cachedInfos = null; // Clear on compile.
+    private static Dictionary<string, ExcelAssetInfo> cachedInfos = null;
 
     private static void OnPostprocessAllAssets(string[] importedAssets, string[] deletedAssets, string[] movedAssets, string[] movedFromAssetPaths)
     {
@@ -37,7 +37,7 @@ public class ExcelImporter : AssetPostprocessor
             }
 
             string excelName = Path.GetFileNameWithoutExtension(path);
-            if (excelName.StartsWith("~$"))
+            if (excelName.StartsWith("~$", StringComparison.Ordinal))
             {
                 continue;
             }

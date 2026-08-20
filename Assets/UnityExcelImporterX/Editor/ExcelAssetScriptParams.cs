@@ -6,7 +6,7 @@ using static TextTemplate;
 
 public class ExcelAssetScriptParams
 {
-    private static ListParams PrepareAssetEntityFiledCommentMutiLineParams(string[] commentLines)
+    private static ListParams PrepareAssetEntityFieldCommentMultiLineParams(string[] commentLines)
     {
         List<DictParams> commentLinesParamsList = new();
         foreach (string line in commentLines)
@@ -24,7 +24,7 @@ public class ExcelAssetScriptParams
     {
         Dictionary<string, ITemplateParams> commentParams = new();
         string[] fieldCommentLines = fieldComment.Split(new[] { "\r\n", "\n" }, StringSplitOptions.None);
-        commentParams["ASSETENTITYFIELDCOMMENTMUTILINE"] = PrepareAssetEntityFiledCommentMutiLineParams(fieldCommentLines);
+        commentParams["ASSETENTITYFIELDCOMMENTMULTILINE"] = PrepareAssetEntityFieldCommentMultiLineParams(fieldCommentLines);
         return new DictParams(commentParams);
     }
 
@@ -123,7 +123,7 @@ public class ExcelAssetScriptParams
                     {
                         ["ASSETKEYFIELDS"] = PrepareAssetKeyFieldsParams(keyFields)
                     };
-                    fieldParams["ASSETMUTIKEYFIELDS"] = new DictParams(keyFieldsParams);
+                    fieldParams["ASSETMULTIKEYFIELDS"] = new DictParams(keyFieldsParams);
                 }
             }
         }
@@ -182,7 +182,7 @@ public class ExcelAssetScriptParams
                 {
                     ["ASSETKEYFIELDNAMES"] = PrepareAssetKeyFieldNamesParams(keyFields)
                 };
-                onAfterDeserializeParams["ASSETMUTIKEYFIELDS"] = new DictParams(mutiKeyFieldsParams);
+                onAfterDeserializeParams["ASSETMULTIKEYFIELDS"] = new DictParams(mutiKeyFieldsParams);
             }
             onAfterDeserializeParamsList.Add(new DictParams(onAfterDeserializeParams));
         }

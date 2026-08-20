@@ -10,28 +10,28 @@ public class TextTemplate
     private const string EndTag = "END";
 
     private string _template;
-    private VBlock _block;
+    private TBlock _block;
 
-    private abstract class VNode
+    private abstract class TNode
     {
         public string Name;
         public Range Range;
     }
-    private class VVar : VNode
+    private class TVar : TNode
     {
 
     }
-    private class VBlock : VNode
+    private class TBlock : TNode
     {
         public Range EndRange;
-        public List<VNode> Children = new();
+        public List<TNode> Children = new();
     }
 
     public interface ITemplateParams
     {
 
     }
-    public class DictParams : ITemplateParams
+    public sealed class DictParams : ITemplateParams
     {
         public Dictionary<string, ITemplateParams> Params { get; }
 
@@ -40,7 +40,7 @@ public class TextTemplate
             Params = @params;
         }
     }
-    public class StringParams : ITemplateParams
+    public sealed class StringParams : ITemplateParams
     {
         public string Param { get; }
 
@@ -49,7 +49,7 @@ public class TextTemplate
             Param = param;
         }
     }
-    public class ListParams : ITemplateParams
+    public sealed class ListParams : ITemplateParams
     {
         public List<DictParams> Params { get; }
 
@@ -71,12 +71,12 @@ public class TextTemplate
 
     private void Parse()
     {
-        VBlock block = new()
+        TBlock block = new()
         {
             Range = new Range(0, 0),
         };
         int startIndex = -1;
-        Stack<VBlock> blockStack = new();
+        Stack<TBlock> blockStack = new();
         blockStack.Push(block);
         int lineIndex = 0;
         int colIndex = 0;
@@ -105,13 +105,13 @@ public class TextTemplate
             }
 
             // 如果当前字符是#，并且startIndex不为-1，说明遇到了一个标签的结束
-            VBlock curBlock = blockStack.Peek();
+            TBlock curBlock = blockStack.Peek();
             ReadOnlySpan<char> tagBuff = _template.AsSpan(startIndex + 1, index - startIndex - 1); // 获取标签内容，去掉前后的#号
             // 如果标签内容是以BEGIN开头的，说明是一个块的开始
             if (tagBuff.StartsWith(BeginTag, StringComparison.Ordinal))
             {
                 string name = tagBuff[BeginTag.Length..].ToString(); // 获取块的名称，去掉BEGIN
-                VBlock newBlock = new()
+                TBlock newBlock = new()
                 {
                     Name = name,
                 };
@@ -150,7 +150,7 @@ public class TextTemplate
             // 为标签内容
             else
             {
-                VVar newVar = new()
+                TVar newVar = new()
                 {
                     Name = tagBuff.ToString(),
                     Range = new Range(startIndex, index + 1)
@@ -172,7 +172,7 @@ public class TextTemplate
         // 默认EOF是万能的结束符，所有未闭合的块都以EOF结束
         while (blockStack.Count > 0)
         {
-            VBlock unclosedBlock = blockStack.Pop();
+            TBlock unclosedBlock = blockStack.Pop();
             unclosedBlock.EndRange = new Range(_template.Length, _template.Length);
         }
         _block = block; 
@@ -181,14 +181,14 @@ public class TextTemplate
     public string Build(DictParams templateParams)
     {
         StringBuilder sb = new(_template.Length * 4);
-        VBlock block = _block;
+        TBlock block = _block;
         if (_block == null)
         {
             throw new Exception("Template not loaded");
         }
 
         List<DictParams> paramStack = new() { templateParams };
-        List<VBlock> blockStack = new() { block };
+        List<TBlock> blockStack = new() { block };
         BuildBlock(ref sb, ref paramStack, ref blockStack);
         string result = sb.ToString();
         return result;
@@ -207,7 +207,7 @@ public class TextTemplate
         return false;
     }
 
-    private static string AppendInBlockString(List<VBlock> blockStack, string errorMsg)
+    private static string AppendInBlockString(List<TBlock> blockStack, string errorMsg)
     {
         List<string> blockNames = blockStack.Skip(1).Select(b => b.Name).ToList();
         if (blockNames.Count > 0)
@@ -219,16 +219,16 @@ public class TextTemplate
         return errorMsg;
     }
 
-    private void BuildBlock(ref StringBuilder sb, ref List<DictParams> paramStack, ref List<VBlock> blockStack)
+    private void BuildBlock(ref StringBuilder sb, ref List<DictParams> paramStack, ref List<TBlock> blockStack)
     {
-        VBlock block = blockStack.Last();
+        TBlock block = blockStack.Last();
         Range startRange = block.Range;
-        foreach (var child in block.Children)
+        foreach (TNode child in block.Children)
         {
             Range curRange = child.Range;
             sb.Append(_template[startRange.End..curRange.Start]);
             // 更新起始范围
-            if (child is VBlock curBlock)
+            if (child is TBlock curBlock)
             {
                 startRange = curBlock.EndRange;
             }
@@ -252,18 +252,19 @@ public class TextTemplate
             }
 
             // 处理块
-            if (child is VBlock vBlock)
+            if (child is TBlock tBlock)
             {
                 if (param is StringParams)
                 {
-                    string errorMsg = $"Parameter type mismatch for block: {child.Name}, expected DictParams or ListParams, got {param.GetType().Name}";
+                    string errorMsg = $"Parameter type mismatch for block: {child.Name}, " +
+                        $"expected DictParams or ListParams, got {param.GetType().Name}";
                     errorMsg = AppendInBlockString(blockStack, errorMsg);
                     Debug.LogWarning(errorMsg);
                     continue;
                 }
                 else
                 {
-                    blockStack.Add(vBlock);
+                    blockStack.Add(tBlock);
                     List<DictParams> dictParams;
                     if (param is DictParams paramDict)
                     {
@@ -283,7 +284,7 @@ public class TextTemplate
                 }
             }
             // 处理变量
-            else if (child is VVar)
+            else if (child is TVar)
             {
                 if (param is StringParams paramString)
                 {
