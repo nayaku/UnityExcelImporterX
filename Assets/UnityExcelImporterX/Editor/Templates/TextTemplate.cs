@@ -175,7 +175,7 @@ public class TextTemplate
             TBlock unclosedBlock = blockStack.Pop();
             unclosedBlock.EndRange = new Range(_template.Length, _template.Length);
         }
-        _block = block; 
+        _block = block;
     }
 
     public string Build(DictParams templateParams)
