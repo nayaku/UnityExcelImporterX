@@ -1,11 +1,11 @@
-using Microsoft.CSharp;
-using NPOI.HSSF.UserModel;
-using NPOI.SS.UserModel;
-using NPOI.XSSF.UserModel;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using NPOI.HSSF.UserModel;
+using NPOI.SS.UserModel;
+using NPOI.SS.Util;
+using NPOI.XSSF.UserModel;
 
 public class SheetField
 {
@@ -30,7 +30,6 @@ public class SheetStruct
 
 public static class ExcelAssetHelper
 {
-    private static readonly CSharpCodeProvider _provider = new();
     /// <summary>
     /// 从Excel表头获取字段信息
     /// </summary>
@@ -75,7 +74,7 @@ public static class ExcelAssetHelper
             if (nameCell.CellType != CellType.String || typeCell.CellType != CellType.String)
             {
                 throw new Exception($"Invalid cell type in sheet '{sheet.SheetName}' at column " +
-                    $"{ExcelHelper.ColIndexToName(j + 1)}({j + 1}). " +
+                    $"{CellReference.ConvertNumToColString(j)}({j + 1}). " +
                     $"Expected string type for field name and field type.");
             }
             string nameValue = nameCell.StringCellValue.Trim();
@@ -90,17 +89,8 @@ public static class ExcelAssetHelper
             // 检查字段名是否重复
             if (!fieldSet.Add(fieldName))
             {
-                throw new Exception($"Duplicate field name '{fieldName}' in sheet '{sheet.SheetName}'.");
-            }
-
-            // 检查字段名是否为有效的C#标识符
-            if (!_provider.IsValidIdentifier(fieldName))
-            {
-                string columnIndexName = ExcelHelper.ColIndexToName(j + 1);
-                throw new Exception($"Invalid C# identifier '{fieldName}' " +
-                    $"in column {columnIndexName}({j + 1}) of sheet '{sheet.SheetName}'. " +
-                    $"Field names must start with a letter or underscore and contain only letters, " +
-                    $"digits, and underscores.");
+                throw new Exception($"Duplicate field name '{fieldName}' in sheet '{sheet.SheetName}' " +
+                    $"at column {CellReference.ConvertNumToColString(j)}({j + 1}).");
             }
             // 检查是否为主键字段
             bool isKey = nameItem.Length > 1 && nameItem[1].Trim().ToLower() == "key";
@@ -134,6 +124,11 @@ public static class ExcelAssetHelper
         for (int i = 0; i < book.NumberOfSheets; i++)
         {
             ISheet sheet = book.GetSheetAt(i);
+            string sheetName = sheet.SheetName.Trim();
+            if (sheetName.Length == 0 || sheetName.StartsWith("#", StringComparison.Ordinal))
+            {
+                continue;
+            }
             (List<SheetField> sheetfields, bool hasKeyField) = GetFieldFromSheetHeader(sheet);
             if (sheetfields == null || sheetfields.Count(f => f != null) == 0)
             {
@@ -144,17 +139,10 @@ public static class ExcelAssetHelper
             {
                 anyHasKeyField = true;
             }
-            string sheetName = sheet.SheetName.Trim();
             // 检查表名是否重复
             if (!sheetNameSet.Add(sheetName))
             {
-                throw new Exception($"Duplicate sheet name '{sheetName}' in Excel file '{excelPath}'.");
-            }
-
-            // 检查表名是否为有效的C#标识符
-            if (!_provider.IsValidIdentifier(sheetName))
-            {
-                throw new Exception($"Invalid sheet name '{sheetName}' in Excel file '{excelPath}'.");
+                throw new Exception($"Duplicate sheet name '{sheetName}'.");
             }
 
             SheetStruct sheetStruct = new()

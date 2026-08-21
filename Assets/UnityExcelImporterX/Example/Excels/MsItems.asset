@@ -83,13 +83,6 @@ MonoBehaviour:
     isNotForSale: 1
     rate: 8.05
     category: 2
-  - id: 10
-    name: "\u56DB\u7EA7\u84DD\u5B9D\u77F3"
-    price: 1010
-    price2: 787.8
-    isNotForSale: 1
-    rate: 8.05
-    category: 2
   itemEx:
   - id: 1
     name: "\u6811\u679D"

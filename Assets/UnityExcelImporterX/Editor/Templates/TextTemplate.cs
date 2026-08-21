@@ -9,8 +9,8 @@ public class TextTemplate
     private const string BeginTag = "BEGIN";
     private const string EndTag = "END";
 
-    private string _template;
-    private TBlock _block;
+    private readonly string _template;
+    private readonly TBlock _block;
 
     private abstract class TNode
     {
@@ -59,17 +59,13 @@ public class TextTemplate
         }
     }
 
-    /// <summary>
-    /// 加载模板文件
-    /// </summary>
-    /// <param name="filePath"></param>
-    public void Load(string filePath)
+    public TextTemplate(string template)
     {
-        _template = NewlineNormalizer.Read(filePath);
-        Parse();
+        _template = template;
+        _block = Parse();
     }
 
-    private void Parse()
+    private TBlock Parse()
     {
         TBlock block = new()
         {
@@ -175,7 +171,7 @@ public class TextTemplate
             TBlock unclosedBlock = blockStack.Pop();
             unclosedBlock.EndRange = new Range(_template.Length, _template.Length);
         }
-        _block = block;
+        return block;
     }
 
     public string Build(DictParams templateParams)

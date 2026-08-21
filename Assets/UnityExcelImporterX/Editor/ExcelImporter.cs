@@ -48,8 +48,15 @@ public class ExcelImporter : AssetPostprocessor
                 continue;
             }
 
-            ImportExcel(path, info);
-            imported = true;
+            try
+            {
+                ImportExcel(path, info);
+                imported = true;
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Failed to import excel file: {path}, error: {ex.Message}");
+            }
         }
 
         if (!imported)
@@ -122,10 +129,11 @@ public class ExcelImporter : AssetPostprocessor
             case CellType.Boolean:
                 return ConvertHelper.ChangeType(cell.BooleanCellValue, fieldType);
             case CellType.Numeric:
-                short format = cell.CellStyle.DataFormat;
-                return format != 0
-                    ? ConvertHelper.ChangeType(cell.DateCellValue, fieldType)
-                    : ConvertHelper.ChangeType(cell.NumericCellValue, fieldType);
+                if (DateUtil.IsCellDateFormatted(cell))
+                {
+                    return ConvertHelper.ChangeType(cell.DateCellValue, fieldType);
+                }
+                return ConvertHelper.ChangeType(cell.NumericCellValue, fieldType);
             case CellType.Formula:
                 if (isFormulaEvalute)
                 {
@@ -142,7 +150,7 @@ public class ExcelImporter : AssetPostprocessor
     }
 
 
-    private static object CreateEntityFromRow(IRow row, List<string> columnNames, Type entityType, string sheetName)
+    private static object CreateEntityFromRow(IRow row, List<string> columnNames, Type entityType)
     {
         object entity = Activator.CreateInstance(entityType);
 
@@ -184,18 +192,15 @@ public class ExcelImporter : AssetPostprocessor
                 CellReference temp = new(cell);
                 string reference = temp.FormatAsString();
                 throw new Exception(
-                    string.Format("Invalid excel cell type at {0}, {1} sheet, value: {2}.\n{3}",
-                    reference,
-                    sheetName,
-                    cell.ToString(),
-                    ex.Message));
+                    $"Cannot convert excel cell value to field type at {reference}, value: {cell}, " +
+                    $"from {cell.CellType} to {entityField.FieldType}.\n{ex.Message}");
             }
         }
 
         return entity;
     }
 
-    private static IList GetEntityListFromSheet(ISheet sheet, Type entityType)
+    private static IList GetEntityListFromSheet(ISheet sheet, Type entityType, string excelPath)
     {
         (List<SheetField> sheetFields, bool _) = ExcelAssetHelper.GetFieldFromSheetHeader(sheet);
         List<string> excelColumnNames = sheetFields.ConvertAll(f => f?.FieldName);
@@ -225,8 +230,15 @@ public class ExcelImporter : AssetPostprocessor
                 continue;
             }
 
-            object entity = CreateEntityFromRow(row, excelColumnNames, entityType, sheet.SheetName);
-            entityList.Add(entity);
+            try
+            {
+                object entity = CreateEntityFromRow(row, excelColumnNames, entityType);
+                entityList.Add(entity);
+            }
+            catch (Exception ex)
+            {
+                Debug.LogError($"Error in sheet '{sheet.SheetName}' in excel {excelPath}: {ex.Message}");
+            }
         }
         return entityList;
     }
@@ -270,7 +282,7 @@ public class ExcelImporter : AssetPostprocessor
             Type[] types = fieldType.GetGenericArguments();
             Type entityType = types[0];
 
-            IList entities = GetEntityListFromSheet(sheet, entityType);
+            IList entities = GetEntityListFromSheet(sheet, entityType, excelPath);
             assetField.SetValue(asset, entities);
             sheetCount++;
         }

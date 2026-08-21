@@ -1,8 +1,8 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections;
 using System.Reflection;
 using System.Threading;
+using Newtonsoft.Json;
 
 public class ConvertHelper
 {
@@ -17,7 +17,18 @@ public class ConvertHelper
         Type nullableType = Nullable.GetUnderlyingType(conversionType);
         if (nullableType != null)
         {
-            return obj == null ? null : Convert.ChangeType(obj, nullableType, provider);
+            return obj == null ? null : ChangeType(obj, nullableType, provider);
+        }
+        #endregion
+
+        #region DateTime
+        if (conversionType == typeof(DateTime))
+        {
+            if (obj is double d)
+            {
+                return DateTime.FromOADate(d);
+            }
+            return Convert.ChangeType(obj, conversionType, provider);
         }
         #endregion
 

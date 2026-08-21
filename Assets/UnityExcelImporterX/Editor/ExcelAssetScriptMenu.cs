@@ -1,11 +1,15 @@
+using Microsoft.CSharp;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using UnityEditor;
+using UnityEngine;
 using static TextTemplate;
 
 public class ExcelAssetScriptMenu
 {
-    private const string ScriptTemplateName = "ExcelAssetScriptTemplete.cs.txt";
+    private const string SCRIPT_TEMPLATE_NAME = "ExcelAssetScriptTemplete.cs.txt";
+    private static readonly CSharpCodeProvider _provider = new();
 
     [MenuItem("Assets/Create/ExcelAssetScript", false)]
     public static void CreateScript()
@@ -17,6 +21,7 @@ public class ExcelAssetScriptMenu
         string assetPath = AssetDatabase.GetAssetPath(selectedAsset);
         string assetName = Path.GetFileName(assetPath);
         string assetDirectory = Path.GetDirectoryName(assetPath);
+        List<string> savePathList = new(selectedAssets.Length);
         if (selectedAssets.Length == 1)
         {
             // 选择保存路径
@@ -27,9 +32,7 @@ public class ExcelAssetScriptMenu
             {
                 return;
             }
-
-            // 生成脚本
-            CreateScript(assetPath, savePath);
+            savePathList.Add(savePath);
         }
         else
         {
@@ -45,10 +48,14 @@ public class ExcelAssetScriptMenu
                 string path = AssetDatabase.GetAssetPath(obj);
                 string name = Path.GetFileNameWithoutExtension(path);
                 string savePath = Path.Combine(saveDirectory, name + ".cs");
-
-                // 生成脚本
-                CreateScript(path, savePath);
+                savePathList.Add(savePath);
             }
+        }
+
+        TextTemplate template = GetTextTemplate();
+        foreach (string savePath in savePathList)
+        {
+            CreateScript(template, assetPath, savePath);
         }
 
         // 刷新资源
@@ -84,7 +91,19 @@ public class ExcelAssetScriptMenu
         return true;
     }
 
-    private static void CreateScript(string assetPath, string savePath)
+    private static void CreateScript(TextTemplate template, string assetPath, string savePath)
+    {
+        try
+        {
+            CreateScriptWithoutException(template, assetPath, savePath);
+        }
+        catch (Exception ex)
+        {
+            Debug.LogError($"Error generating script for '{assetPath}': {ex.Message}");
+        }
+    }
+
+    private static void CreateScriptWithoutException(TextTemplate template, string assetPath, string savePath)
     {
         // 读取Excel文件
         ExcelStruct excelStruct = ExcelAssetHelper.GetExcelStruct(assetPath);
@@ -92,23 +111,57 @@ public class ExcelAssetScriptMenu
         {
             return;
         }
+        // 验证Excel文件名、Sheet名和字段名是否合法
+        if (!ValidateExcelScriptFieldName(excelStruct, out string errorMessage))
+        {
+            errorMessage += "Name must start with a letter or underscore and contain only letters, digits, and underscores.";
+            throw new Exception(errorMessage);
+        }
 
-        string templateFilePath = GetScriptTemplatePath();
         DictParams dictParams = ExcelAssetScriptParams.PrepareTemplateParams(excelStruct);
-        TextTemplate template = new();
-        template.Load(templateFilePath);
         string scriptContent = template.Build(dictParams);
         NewlineNormalizer.Write(savePath, scriptContent);
     }
 
-    private static string GetScriptTemplatePath()
+    private static TextTemplate GetTextTemplate()
     {
         string currentDirectory = Directory.GetCurrentDirectory();
-        string[] filePath = Directory.GetFiles(currentDirectory, ScriptTemplateName, SearchOption.AllDirectories);
+        string[] filePath = Directory.GetFiles(currentDirectory, SCRIPT_TEMPLATE_NAME, SearchOption.AllDirectories);
         if (filePath.Length == 0)
         {
             throw new Exception("Script template not found.");
         }
-        return filePath[0];
+        string scriptTemplatePath = filePath[0];
+        string templateContent = NewlineNormalizer.Read(scriptTemplatePath);
+        return new TextTemplate(templateContent);
+    }
+
+    private static bool ValidateExcelScriptFieldName(ExcelStruct excelStruct, out string errorMsg)
+    {
+        errorMsg = string.Empty;
+        if (!_provider.IsValidIdentifier(excelStruct.ExcelName))
+        {
+            errorMsg = $"Invalid C# identifier excel name '{excelStruct.ExcelName}'.";
+            return false;
+        }
+        foreach (SheetStruct sheet in excelStruct.Sheets)
+        {
+            if (!_provider.IsValidIdentifier(sheet.SheetName))
+            {
+                errorMsg = $"Invalid C# identifier sheet name '{sheet.SheetName}' in excel '{excelStruct.ExcelName}'.";
+                return false;
+            }
+            foreach (SheetField field in sheet.Fields)
+            {
+                if (field == null)
+                    continue;
+                if (!_provider.IsValidIdentifier(field.FieldName))
+                {
+                    errorMsg = $"Invalid C# identifier field name '{field.FieldName}' in sheet '{sheet.SheetName}' of excel '{excelStruct.ExcelName}'.";
+                    return false;
+                }
+            }
+        }
+        return true;
     }
 }
