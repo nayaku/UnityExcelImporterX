@@ -13,7 +13,7 @@
 - **多表支持**：一次性导入Excel中的所有工作表
 - **功能简单**：无需配置，直接导入即可
 
-## 需求
+## 开始前准备
 
 - **Unity版本**：2021.3.45f1 或以上
 - **Excel文件格式**：.xls, .xlsx
@@ -72,13 +72,13 @@ https://github.com/nayaku/UnityExcelImporterX.git?path=Assets/UnityExcelImporter
 **示例表格结构：**
 ![示例表格结构图](./README.cn.assets/image-20250915154749933.png)
 
-将Excel文件放入Unity项目的任意文件夹中即可。
+将 Excel 文件放入 Unity 项目的 `Assets` 目录或其子目录中。
 
 ### 步骤2：自动生成代码
 
 1. **在Unity中选中Excel文件**
 2. **右键 → Create → ExcelAssetScript**（或在顶部菜单选择 **Assets → Create → ExcelAssetScript**）
-3. **系统将自动个实体类脚本**（如 `MstItems.cs`）
+3. **系统将自动生成实体类和容器类脚本**（如 `MstItems.cs`）
 
 ![image-20250910174623347](./README.assets/image-20250910174623347.png)
 
@@ -125,11 +125,11 @@ public class MstItems : ScriptableObject
 
 ### 完成
 
-现在您可以在Unity中直接查看和编辑导入的数据：
+现在可以在 Unity Inspector 中直接查看和编辑导入的数据：
 
 ![image-20250915155540723](./README.cn.assets/image-20250915155540723.png)
 
-## 高级功能详解
+## 高级功能
 
 ### 索引功能
 
@@ -332,7 +332,7 @@ public class MstItems : ScriptableObject
 
 ### 修改代码生成模板
 
-模板为[ExcelAssetScriptTemplete.cs.txt](Assets\UnityExcelImporterX\Editor\Templates)。
+代码生成模板位于 [`Assets/UnityExcelImporterX/Editor/Templates/ExcelAssetScriptTemplete.cs.txt`](Assets/UnityExcelImporterX/Editor/Templates/ExcelAssetScriptTemplete.cs.txt)。
 
 ## 常见问题
 
@@ -343,6 +343,20 @@ public class MstItems : ScriptableObject
 1. 确保Excel文件已保存
 2. 在Unity中右键点击Excel文件 → Reimport
 3. 检查控制台是否有错误信息
+
+</details>
+
+<details>
+<summary>Q: 修改表头后字段不匹配？</summary>
+
+增删列、修改字段名或类型后，需要重新执行 **Create → ExcelAssetScript**，等待 Unity 编译完成后再导入。
+
+</details>
+
+<details>
+<summary>Q: 找不到生成的 .asset？</summary>
+
+默认资源与 Excel 位于同一目录；如果设置了 `AssetPath`，请到指定目录查找。
 
 </details>
 
