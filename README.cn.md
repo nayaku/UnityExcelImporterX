@@ -26,6 +26,7 @@
 1. 访问 [GitHub Releases页面](https://github.com/nayaku/UnityExcelImporterX/releases)
 2. 下载最新的 `.unitypackage` 文件
 3. 双击文件或在Unity中通过 **Assets → Import Package → Custom Package** 导入
+
 </details>
 
 <details>
@@ -61,12 +62,12 @@ https://github.com/nayaku/UnityExcelImporterX.git?path=Assets/UnityExcelImporter
 
 创建一个Excel文件，按以下格式组织数据：
 
-| 行号 | 内容说明 | 示例 |
-|---|---|---|
-| **第1行** | 列名（字段名） | `id`, `name`, `price` |
-| **第2行** | C#数据类型 | `int`, `string`, `float` |
-| **第3行** | 注释说明 | `编号`, `物品名`, `售价` |
-| **第4行+** | 实际数据 | `1`, `物品名1`, `99.5` |
+| 行号             | 内容说明       | 示例                           |
+| ---------------- | -------------- | ------------------------------ |
+| **第1行**  | 字段名 | `id`, `name`, `price`    |
+| **第2行**  | C#数据类型     | `int`, `string`, `float` |
+| **第3行**  | 注释       | `编号`, `物品名`, `售价` |
+| **第4行+** | 实际数据       | `1`, `物品名1`, `99.5`   |
 
 **示例表格结构：**
 ![示例表格结构图](./README.cn.assets/image-20250915154749933.png)
@@ -110,7 +111,7 @@ public class MstItems : ScriptableObject
 }
 ```
 
-> [!WARNING]  
+> [!WARNING]
 > **重要提醒**：当Excel表格结构发生变化时（如添加/删除列），需要重新执行此步骤生成最新代码。
 
 ### 步骤3：自动导入数据
@@ -128,16 +129,70 @@ public class MstItems : ScriptableObject
 
 ![image-20250915155540723](./README.cn.assets/image-20250915155540723.png)
 
-
-
 ## 高级功能详解
+
+### 索引功能
+
+在字段名后面追加`, key`可标记为主键，例如`id, key`。支持多个主键。
+
+![image-20260824110911760](./README.cn.assets/image-20260824110911760.png)
+
+**生成的代码和数据：**
+
+```c#
+[Serializable]
+public class KeyExampleEntity
+{
+    public int id;
+    /// <summary>
+    /// name of item
+    /// </summary>
+    public string name;
+    public float hp;
+}
+
+[ExcelAsset]
+public class KeyExample : ScriptableObject, ISerializationCallbackReceiver
+{
+    public List<KeyExampleEntity> item = new();
+    public Dictionary<(int id, string name), KeyExampleEntity> itemDict;
+
+    public void OnBeforeSerialize()
+    {
+        // Implement any logic needed before serialization
+    }
+
+    public void OnAfterDeserialize()
+    {
+        // Implement any logic needed after deserialization
+        itemDict = new();
+        foreach (KeyExampleEntity item in item)
+        {
+            var key = (
+                item.id,
+                item.name
+            );
+            if (itemDict.ContainsKey(key))
+            {
+                Debug.LogError($"Duplicate key found in itemDict (script: KeyExample): {key}. Each key must be unique.");
+                continue; // Skip adding this item to the dictionary
+            }
+            itemDict[key] = item;
+        }
+    }
+}
+```
+
+![image-20260824111231781](./README.cn.assets/image-20260824111231781.png)
 
 ### 注释功能
 
-#### 单行注释
+#### 行注释
+
 在行的第一个单元格输入 `#`，整行将被忽略。
 
-#### 单列注释  
+#### 列注释
+
 在列的第一行输入 `#`，整列将被忽略。
 
 **Excel表格：**
@@ -166,6 +221,10 @@ public class SummaryExample : ScriptableObject
 
 ![image-20250912202801969](./README.cn.assets/image-20250912202801969.png)
 
+#### 表注释
+
+在工作表名字前输入 `#`，整个工作表将被忽略。
+
 ### 数据边界
 
 - **列边界**：第一行出现空单元格时，右侧所有列将被忽略
@@ -174,6 +233,7 @@ public class SummaryExample : ScriptableObject
 ### 枚举类型
 
 #### 步骤1：创建枚举定义
+
 ```c#
 // 创建 ColorEnum.cs 文件
 public enum ColorEnum
@@ -185,9 +245,11 @@ public enum ColorEnum
 ```
 
 #### 步骤2：Excel中填写枚举值
+
 ![image-20250912203335293](./README.cn.assets/image-20250912203335293.png)
 
 #### 步骤3：生成的代码和数据
+
 ```c#
 [Serializable]
 public class EnumExampleEntity
@@ -267,6 +329,11 @@ public class MstItems : ScriptableObject
     public List<MstItemsEntity> Entities;
 }
 ```
+
+### 修改代码生成模板
+
+模板为[ExcelAssetScriptTemplete.cs.txt](Assets\UnityExcelImporterX\Editor\Templates)。
+
 ## 常见问题
 
 <details>
@@ -276,6 +343,7 @@ public class MstItems : ScriptableObject
 1. 确保Excel文件已保存
 2. 在Unity中右键点击Excel文件 → Reimport
 3. 检查控制台是否有错误信息
+
 </details>
 
 ## 许可证
