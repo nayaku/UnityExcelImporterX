@@ -76,13 +76,13 @@ Create an Excel file with the following structure:
 **Example Table Structure:**
 ![image-20250915154749933](./README.cn.assets/image-20250915154749933.png)
 
-**Place the Excel file anywhere in your Unity project**
+Place the Excel file in the Unity project's `Assets` directory or one of its subdirectories.
 
 ### Step 2: Auto-generate Code
 
 1. **Select the Excel file in Unity**
 2. **Right-click → Create → ExcelAssetScript** (or use **Assets → Create → ExcelAssetScript** from top menu)
-3. **System will automatically generate entity class scripts** (e.g., `MstItems.cs`)
+3. The system automatically generates the entity and container class scripts (for example, `MstItems.cs`).
 
 ![image-20250910174623347](./README.assets/image-20250910174623347.png)
 
@@ -124,7 +124,7 @@ public class MstItems : ScriptableObject
 - **Return to Unity**, the system will automatically detect changes and import data
 - **A `.asset` file with the same name as the Excel file will be generated in the same directory**
 
-**If not automatically generated, you can manually reimport the Excel file to trigger auto-generation:**
+If it is not generated automatically, manually reimport the Excel file to trigger generation: right-click the Excel file → **Reimport**.
 ![image-20250910174734537](./README.assets/image-20250910174734537.png)
 
 ### Done
@@ -141,7 +141,55 @@ Append `, key` to a field name to mark it as a primary key, for example `id, key
 
 ![Index example](./README.cn.assets/image-20260824110911760.png)
 
+The generated code includes a `Dictionary` for quickly looking up data by its primary key:
 
+```csharp
+[Serializable]
+public class KeyExampleEntity
+{
+    public int id;
+    /// <summary>
+    /// name of item
+    /// </summary>
+    public string name;
+    public float hp;
+}
+
+[ExcelAsset]
+public class KeyExample : ScriptableObject, ISerializationCallbackReceiver
+{
+    public List<KeyExampleEntity> item = new();
+    public Dictionary<(int id, string name), KeyExampleEntity> itemDict;
+
+    public void OnBeforeSerialize()
+    {
+        // Implement any logic needed before serialization
+    }
+
+    public void OnAfterDeserialize()
+    {
+        // Implement any logic needed after deserialization
+        itemDict = new();
+        foreach (KeyExampleEntity item in item)
+        {
+            var key = (
+                item.id,
+                item.name
+            );
+            if (itemDict.ContainsKey(key))
+            {
+                Debug.LogError($"Duplicate key found in itemDict (script: KeyExample): {key}. Each key must be unique.");
+                continue; // Skip adding this item to the dictionary
+            }
+            itemDict[key] = item;
+        }
+    }
+}
+```
+
+![Generated indexed data](./README.cn.assets/image-20260824111231781.png)
+
+> If a duplicate primary key is found, an error is logged and that entry is skipped.
 ### Comment System
 
 #### Row Comment
@@ -188,10 +236,10 @@ Prefix a worksheet name with `#` to ignore the entire worksheet.
 
 ### Enum
 
-#### Step 1: Create a Enum Definition
+First, create a C# enum:
 
 ```csharp
-// Create ColorEnum.cs file
+// Create ColorEnum.cs
 public enum ColorEnum
 {
     RED,
@@ -200,11 +248,11 @@ public enum ColorEnum
 }
 ```
 
-#### Step 2: Fill Enum Values in Excel
+Enter the enum values directly in Excel. The tool automatically matches them to the enum type:
 
-![image-20250912203335293](./README.cn.assets/image-20250912203335293.png)
+![Enum values in Excel](./README.cn.assets/image-20250912203335293.png)
 
-#### Step 3: Generated Code and Data
+Generated code and data:
 
 ```csharp
 [Serializable]
@@ -218,21 +266,18 @@ public class EnumExampleEntity
     /// <summary>
     /// Color
     /// </summary>
-    public ColorEnum color; // Auto-matches enum type
+    public ColorEnum color; // Automatically matches the enum type
 }
 ```
 
-![image-20250912203534954](./README.cn.assets/image-20250912203534913.png)
-
+![Generated enum data](./README.cn.assets/image-20250912203534913.png)
 ### Complex Types
 
-**Supports array types, datetime types, dictionary types and custom types**
+**Supports arrays, date/time values, dictionaries, and custom types.**
 
-When using array types, square brackets can be omitted.
+Square brackets may be omitted when using array types.
 
-**Generated Code and Data:**
-
-Create custom type `CustomType`
+Create a custom type named `CustomType`:
 
 ```csharp
 [Serializable]
@@ -243,8 +288,9 @@ public class CustomType
 }
 ```
 
-![image-20250915170746647](./README.assets/image-20250915170746647.png)
+![Complex types in Excel](./README.cn.assets/image-20250915170746647.png)
 
+![Generated complex-type data](./README.cn.assets/image-20250915170904074.png)
 ### Custom Asset Path
 
 You can change the ScriptableObject generation position by specifying AssetPath as the ExcelAssetAttribute as shown below:
@@ -288,6 +334,8 @@ public class MstItems : ScriptableObject
 
 The code generation template is located at [`Assets/UnityExcelImporterX/Editor/Templates/ExcelAssetScriptTemplete.cs.txt`](Assets/UnityExcelImporterX/Editor/Templates/ExcelAssetScriptTemplete.cs.txt).
 
+You can customize the generated code style to match your project conventions.
+
 ## FAQ
 
 <details>
@@ -296,11 +344,24 @@ The code generation template is located at [`Assets/UnityExcelImporterX/Editor/T
 **Solutions**:
 
 1. Ensure Excel file is saved
-2. Right-click Excel file in Unity → Reimport
+2. Right-click the Excel file in Unity → **Reimport**
 3. Check console for error messages
 
 </details>
 
+<details>
+<summary>Q: Fields do not match after changing the headers?</summary>
+
+After adding or removing columns, or changing field names or types, run **Create → ExcelAssetScript** again and wait for Unity to finish compiling before importing.
+
+</details>
+
+<details>
+<summary>Q: Where is the generated `.asset` file?</summary>
+
+By default, the asset is stored in the same directory as the Excel file. If `AssetPath` is set, look in the specified directory.
+
+</details>
 ## License
 
 This library is under the [MIT License](LICENSE.txt).

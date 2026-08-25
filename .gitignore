@@ -95,3 +95,5 @@ Assets/Packages.meta
 
 # Built Visual Studio Code Extensions
 *.vsix
+
+.reasonix

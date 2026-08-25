@@ -76,9 +76,9 @@ https://github.com/nayaku/UnityExcelImporterX.git?path=Assets/UnityExcelImporter
 
 ### 步骤2：自动生成代码
 
-1. **在Unity中选中Excel文件**
+1. 在Unity中选中Excel文件
 2. **右键 → Create → ExcelAssetScript**（或在顶部菜单选择 **Assets → Create → ExcelAssetScript**）
-3. **系统将自动生成实体类和容器类脚本**（如 `MstItems.cs`）
+3. 系统将自动生成实体类和容器类脚本（如 `MstItems.cs`）
 
 ![image-20250910174623347](./README.assets/image-20250910174623347.png)
 
@@ -120,7 +120,7 @@ public class MstItems : ScriptableObject
 - **回到Unity**，系统将自动检测变更并导入数据
 - **在相同目录下**会生成与Excel同名的 `.asset` 文件
 
- **如果没有自动生成，可以手动重新导入Excel文件来触发自动生成：**
+ 如果没有自动生成，可以手动重新导入 Excel 文件来触发自动生成：右键点击 Excel 文件 → **Reimport**。
 ![image-20250910174734537](./README.assets/image-20250910174734537.png)
 
 ### 完成
@@ -137,7 +137,7 @@ public class MstItems : ScriptableObject
 
 ![image-20260824110911760](./README.cn.assets/image-20260824110911760.png)
 
-**生成的代码和数据：**
+生成的代码会包含一个 `Dictionary`，用于按主键快速查找数据：
 
 ```c#
 [Serializable]
@@ -184,6 +184,8 @@ public class KeyExample : ScriptableObject, ISerializationCallbackReceiver
 ```
 
 ![image-20260824111231781](./README.cn.assets/image-20260824111231781.png)
+
+> 如果出现重复主键，会输出错误日志并跳过该条数据。
 
 ### 注释功能
 
@@ -232,7 +234,7 @@ public class SummaryExample : ScriptableObject
 
 ### 枚举类型
 
-#### 步骤1：创建枚举定义
+先创建一个 C# 枚举：
 
 ```c#
 // 创建 ColorEnum.cs 文件
@@ -244,11 +246,11 @@ public enum ColorEnum
 }
 ```
 
-#### 步骤2：Excel中填写枚举值
+在 Excel 中直接填写枚举值，工具会自动匹配枚举类型：
 
 ![image-20250912203335293](./README.cn.assets/image-20250912203335293.png)
 
-#### 步骤3：生成的代码和数据
+生成的代码和数据：
 
 ```c#
 [Serializable]
@@ -273,8 +275,6 @@ public class EnumExampleEntity
 **支持数组类型、日期时间类型、字典类型和自定义类型**
 
 使用数组类型的时候，可省略方括号。
-
-**生成的代码和数据：**
 
 创建自定义类型`CustomType`
 
@@ -334,6 +334,8 @@ public class MstItems : ScriptableObject
 
 代码生成模板位于 [`Assets/UnityExcelImporterX/Editor/Templates/ExcelAssetScriptTemplete.cs.txt`](Assets/UnityExcelImporterX/Editor/Templates/ExcelAssetScriptTemplete.cs.txt)。
 
+可以根据项目规范自定义生成代码的风格。
+
 ## 常见问题
 
 <details>
@@ -341,7 +343,7 @@ public class MstItems : ScriptableObject
 **解决方法**：
 
 1. 确保Excel文件已保存
-2. 在Unity中右键点击Excel文件 → Reimport
+2. 在Unity中右键点击Excel文件 → **Reimport**
 3. 检查控制台是否有错误信息
 
 </details>
